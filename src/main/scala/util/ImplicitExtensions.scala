@@ -1,6 +1,6 @@
 package util
 
-import com.datastax.driver.core.Session
+import com.datastax.driver.core.{Row, Session}
 import scala.collection.JavaConverters._
 
 object ImplicitExtensions {
@@ -11,10 +11,7 @@ object ImplicitExtensions {
   implicit class SessionExtension(session: Session) {
 
     def initCassandra = {
-      session
-        .createKeyspaces
-        .createColumnFamily
-        .insertDataIntoTable
+      session.createKeyspaces.createColumnFamily.insertDataIntoTable
     }
 
     def createKeyspaces = {
@@ -27,8 +24,7 @@ object ImplicitExtensions {
     def createColumnFamily = {
       session.execute("USE r1;")
       session.execute("drop table if exists t2;")
-      session.execute(
-        """ create table if not exists t2(
+      session.execute(""" create table if not exists t2(
           |   id int,
           |   age int,
           |   name text,
@@ -40,19 +36,22 @@ object ImplicitExtensions {
     }
 
     def insertDataIntoTable = {
-      for(i <- 0 to 5) {
-        session.execute(s"INSERT INTO t2(id, age, name, lastName) VALUES($i, $i, 'name_$i', 'lastName_$i')")
+      for (i <- 0 to 5) {
+        session.execute(
+          s"INSERT INTO t2(id, age, name, lastName) VALUES($i, $i, 'name_$i', 'lastName_$i')")
       }
-      for(i <- 0 to 5) {
-        session.execute(s"INSERT INTO t2(id, age, name, lastName) VALUES($i, ${i+1}, 'name_${i+1}', 'lastName_${i+1}')")
+      for (i <- 0 to 5) {
+        session.execute(
+          s"INSERT INTO t2(id, age, name, lastName) VALUES($i, ${i + 1}, 'name_${i + 1}', 'lastName_${i + 1}')")
       }
-      for(i <- 0 to 5) {
-        session.execute(s"INSERT INTO t2(id, age, name, lastName) VALUES($i, ${i+2}, 'name_${i+2}', 'lastName_${i+2}')")
+      for (i <- 0 to 5) {
+        session.execute(
+          s"INSERT INTO t2(id, age, name, lastName) VALUES($i, ${i + 2}, 'name_${i + 2}', 'lastName_${i + 2}')")
       }
       session
     }
 
-    def executeAs(query: String) = {
+    def executeAs(query: String): List[Row] = {
       session.execute(query).all().asScala.toList
     }
   }
